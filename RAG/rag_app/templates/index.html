@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <!-- 文字コード・表示領域・静的ファイルの設定 -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>書類ナレッジ</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}">
+  <script src="{{ url_for('static', filename='chat.js') }}" defer></script>
+</head>
+<body>
+  <!-- アプリ名と依存サービスの状態表示 -->
+  <header class="topbar">
+    <a class="wordmark" href="/" aria-label="書類ナレッジ ホーム">
+      <span class="wordmark-mark" aria-hidden="true">文</span>
+      <span>書類ナレッジ</span>
+    </a>
+    <div class="service-state" aria-live="polite">
+      <span class="state-dot" id="health-dot"></span>
+      <span id="health-status">接続を確認中</span>
+    </div>
+  </header>
+
+  <!-- 質問入力と回答表示のメイン領域 -->
+  <main class="workspace">
+    <!-- 同期状態（バックグラウンド同期の進捗・Drive接続・失敗一覧）。同期APIがない場合は非表示 -->
+    {% if sync_enabled %}
+    <section class="sync-panel" id="sync-panel" aria-label="同期状態" aria-live="polite">
+      <div class="sync-overview">
+        <div class="sync-copy">
+          <div class="sync-row">
+            <span class="state-dot" id="sync-dot"></span>
+            <h2 class="sync-heading" id="sync-status">同期状態を確認中</h2>
+          </div>
+          <p class="sync-detail" id="sync-detail">検索用インデックスの状態を取得しています。</p>
+        </div>
+        <div class="sync-actions">
+          <button class="ghost-button" id="sync-now" type="button" title="資料の同期状態を今すぐ確認">
+            <span aria-hidden="true">&#8635;</span><span>同期</span>
+          </button>
+          <button class="ghost-button" id="drive-connect" type="button" hidden>
+            Google Driveに接続
+          </button>
+        </div>
+      </div>
+      <div class="sync-meta">
+        <span id="sync-count">検索可能な資料を確認中</span>
+        <span id="sync-last-run"></span>
+      </div>
+      <div class="sync-progress" id="sync-progress" hidden>
+        <progress id="sync-progress-bar" max="100" value="0"></progress>
+        <span class="sync-progress-text" id="sync-progress-text"></span>
+      </div>
+      <p class="sync-notice" id="sync-notice" hidden></p>
+      <details class="sync-failures" id="sync-failures" hidden>
+        <summary id="sync-failure-summary"></summary>
+        <ul id="sync-failure-list"></ul>
+      </details>
+    </section>
+    {% endif %}
+
+    <section class="question-section" aria-labelledby="page-title">
+      <div class="section-kicker">LOCAL DOCUMENT SEARCH</div>
+      <h1 id="page-title">書類に質問する</h1>
+      <p class="lead">同期した資料の内容から、根拠となるページ付きで回答します。</p>
+      <form id="question-form" class="question-form">
+        <label for="question">質問</label>
+        <textarea id="question" name="question" rows="3" maxlength="{{ max_question_chars }}" required
+          placeholder="質問を入力してください" aria-describedby="input-error"></textarea>
+        <div class="form-footer">
+          <span class="input-error" id="input-error" role="alert"></span>
+          <button class="submit-button" id="submit-button" type="submit">
+            <span>質問する</span>
+            <span class="button-arrow" aria-hidden="true">&#8594;</span>
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- 回答・棄却状態・参照資料の表示領域 -->
+    <section class="response-section" id="response-section" aria-live="polite" hidden>
+      <div class="response-heading">
+        <h2>回答</h2>
+        <span class="answer-state" id="answer-state"></span>
+      </div>
+      <p class="request-state" id="request-state" hidden>回答を作成しています</p>
+      <p class="response-error" id="response-error" role="alert" hidden></p>
+      <p class="answer-text" id="answer-text"></p>
+      <div class="sources-section" id="sources-section" hidden>
+        <h3>参照した箇所</h3>
+        <div class="source-list" id="source-list"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ローカル実行先の表示 -->
+  <footer class="page-footer"><span>127.0.0.1</span><span class="footer-rule"></span><span>LOCAL</span></footer>
+</body>
+</html>
